@@ -70,3 +70,9 @@ def test_banner_and_secret_follow_difficulty():
     at.sidebar.selectbox[0].set_value("Easy").run()
     assert "between 1 and 20" in _info(at)[0]
     assert 1 <= at.session_state.secret <= 20
+
+
+def test_banner_updates_immediately_after_a_guess():
+    at = _new_app(50)
+    _guess(at, 1)
+    assert "Attempts left: 7" in _info(at)[0]
