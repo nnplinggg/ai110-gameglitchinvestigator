@@ -1,2 +1,29 @@
-...................                                                      [100%]
-19 passed in 0.95s
+============================= test session starts ==============================
+platform darwin -- Python 3.14.6, pytest-9.2.0, pluggy-1.7.0 -- /Users/xps/ai110-gameglitchinvestigator/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/xps/ai110-gameglitchinvestigator
+plugins: anyio-4.16.0
+collecting ... collected 20 items
+
+tests/test_app_flow.py::test_hint_direction_is_consistent_across_attempts PASSED [  5%]
+tests/test_app_flow.py::test_high_guess_says_go_lower_on_every_attempt PASSED [ 10%]
+tests/test_app_flow.py::test_fresh_game_shows_full_attempt_allowance PASSED [ 15%]
+tests/test_app_flow.py::test_losing_takes_exactly_attempt_limit_guesses PASSED [ 20%]
+tests/test_app_flow.py::test_new_game_fully_resets_after_loss PASSED     [ 25%]
+tests/test_app_flow.py::test_new_game_secret_respects_difficulty_range PASSED [ 30%]
+tests/test_app_flow.py::test_banner_and_secret_follow_difficulty PASSED  [ 35%]
+tests/test_app_flow.py::test_banner_updates_immediately_after_a_guess PASSED [ 40%]
+tests/test_game_logic.py::test_winning_guess PASSED                      [ 45%]
+tests/test_game_logic.py::test_guess_too_high PASSED                     [ 50%]
+tests/test_game_logic.py::test_guess_too_low PASSED                      [ 55%]
+tests/test_game_logic.py::test_too_high_message_tells_player_to_go_lower PASSED [ 60%]
+tests/test_game_logic.py::test_too_low_message_tells_player_to_go_higher PASSED [ 65%]
+tests/test_game_logic.py::test_numeric_not_lexicographic_comparison_low PASSED [ 70%]
+tests/test_game_logic.py::test_numeric_not_lexicographic_comparison_high PASSED [ 75%]
+tests/test_game_logic.py::test_wrong_guess_never_raises_score PASSED     [ 80%]
+tests/test_game_logic.py::test_first_attempt_win_scores_90 PASSED        [ 85%]
+tests/test_game_logic.py::test_win_score_has_floor_of_10 PASSED          [ 90%]
+tests/test_game_logic.py::test_difficulty_ranges PASSED                  [ 95%]
+tests/test_game_logic.py::test_parse_guess_edge_cases PASSED             [100%]
+
+============================== 20 passed in 0.97s ==============================

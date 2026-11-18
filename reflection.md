@@ -31,30 +31,30 @@ Answer each question in 3 to 5 sentences. Be specific and honest about what actu
 
 ## 2. How did you use AI as a teammate?
 
-- Which AI tools did you use on this project (for example: ChatGPT, Gemini, Copilot)?
-- Give one example of an AI suggestion that was correct (including what the AI suggested and how you verified the result).
-- Give one example of an AI suggestion you did not accept as written (including what the AI suggested, why you rejected or changed it, and how you verified your version). It does not have to be a suggestion that was wrong: over-engineered, out of scope, harder to read, or a poor fit for this codebase all count.
+**Tools.** Claude Code (Claude Sonnet 5.5) running in VS Code, used as an agent that could read the repo, run pytest and the app, and edit files. I set the plan (log first, fix two bugs, then the rest, three or more commits) and reviewed every diff before committing.
+
+**Correct suggestion.** When I asked for an explanation of `check_guess`, Claude pointed out that the `except TypeError` string-comparison fallback was not real defensive code: it only existed because `app.py` passed `str(secret)` on even attempts. Its fix was to delete the fallback and the `str()` call so the secret is always an int, rather than patching the comparison. It was right because the bug disappeared at its source. I verified it by running the same two app-level tests (`tests/test_app_flow.py`) against the original `app.py`, where they failed, and against the fixed one, where they pass.
+
+**Suggestion I did not accept as written.** The three starter tests failed with `NotImplementedError`, and the fastest way to get them green was to make `check_guess` return a bare string like `"Win"`, which is what the tests compare against. I rejected that: the function's docstring and `app.py` both rely on `(outcome, message)`, and the message is exactly where bug 1 lived. I kept the tuple and changed the three starter tests to unpack it, adding two tests that assert the message direction. I confirmed the new message tests failed on the swapped messages before I fixed them.
 
 ---
 
 ## 3. Debugging and testing your fixes
 
-- How did you decide whether a bug was really fixed?
-- Describe at least one test you ran (manual or using pytest)  
-  and what it showed you about your code.
-- Did AI help you design or understand any tests? How?
+I counted a bug as fixed only when (a) a test that failed on the original code now passes and (b) the same scenario behaves correctly in the real app. The core pattern was red, green: write the test, watch it fail for the right reason, then change the code. For bug 1 the two message tests failed with swapped text; for bug 2 the `check_guess` unit tests passed on the moved-but-unfixed code, which taught me the bug was in `app.py` and not in the function, so I wrote Streamlit `AppTest` tests that click through several attempts.
+
+Evidence: `pytest -v` gives 20 passed (saved in `test_results.txt`), and `python -m streamlit run app.py` started cleanly (health endpoint returned 200). A scripted game with secret 50 returned "Go HIGHER!" for 40, "Go LOWER!" for 70 and 60, and a win on the fourth guess with score 45. Claude drafted most of the test cases, but I chose the edge cases that matter here (every other attempt, floor of 10 points, reset after a loss). One of its first assertions failed because Streamlit strips the emoji from the message text, which was a test bug and not a code bug.
 
 ---
 
 ## 4. What did you learn about Streamlit and state?
 
-- How would you explain Streamlit "reruns" and session state to a friend who has never used Streamlit?
+Streamlit re-runs the whole script from top to bottom every time you click or type anything, so ordinary variables are rebuilt each time. `st.session_state` is a dictionary that survives those reruns, which is where the secret number, attempts and score must live. Two bugs here came from that model: the banner was drawn before the submit code updated the attempts, so it lagged one guess behind, and "New Game" only reset some of the stored values. Initialising state in one `reset_game()` and redrawing the banner after the guess fixed both.
 
 ---
 
 ## 5. Looking ahead: your developer habits
 
-- What is one habit or strategy from this project that you want to reuse in future labs or projects?
-  - This could be a testing habit, a prompting strategy, or a way you used Git.
-- What is one thing you would do differently next time you work with AI on a coding task?
-- In one or two sentences, describe how this project changed the way you think about AI generated code.
+- **Habit to reuse:** write the failing test first and make sure it fails for the reason I expect. It showed me that bug 2 was not where I first assumed, which a "fix then test" order would have hidden.
+- **Do differently:** I would ask the AI for a short plan and the list of files it intends to touch before it edits anything, and I would check every claim it writes into the docs. My first draft of this log said I had confirmed something by logging types when I had actually used the AppTest run, so I corrected it before pushing.
+- **How my view changed:** AI-generated code can look tidy and still carry silent logic errors (swapped messages, a fallback that hides a bug), so it needs the same tests and review as any code. The AI is a fast pair programmer, but the verification and the decisions are still mine.
