@@ -27,25 +27,24 @@ low, high = get_range_for_difficulty(difficulty)
 st.sidebar.caption(f"Range: {low} to {high}")
 st.sidebar.caption(f"Attempts allowed: {attempt_limit}")
 
-if "secret" not in st.session_state:
+# FIX: Bugs 3 and 5. One reset function used by first load, New Game and difficulty
+# changes (Claude suggested it; I kept it in app.py because it only touches session state).
+def reset_game():
     st.session_state.secret = random.randint(low, high)
-
-if "attempts" not in st.session_state:
-    st.session_state.attempts = 1
-
-if "score" not in st.session_state:
+    st.session_state.attempts = 0
     st.session_state.score = 0
-
-if "status" not in st.session_state:
     st.session_state.status = "playing"
-
-if "history" not in st.session_state:
     st.session_state.history = []
+    st.session_state.difficulty = difficulty
+
+
+if "difficulty" not in st.session_state or st.session_state.difficulty != difficulty:
+    reset_game()
 
 st.subheader("Make a guess")
 
 st.info(
-    f"Guess a number between 1 and 100. "
+    f"Guess a number between {low} and {high}. "
     f"Attempts left: {attempt_limit - st.session_state.attempts}"
 )
 
@@ -70,8 +69,7 @@ with col3:
     show_hint = st.checkbox("Show hint", value=True)
 
 if new_game:
-    st.session_state.attempts = 0
-    st.session_state.secret = random.randint(1, 100)
+    reset_game()
     st.success("New game started.")
     st.rerun()
 

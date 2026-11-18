@@ -44,3 +44,37 @@ def test_numeric_not_lexicographic_comparison_low():
 def test_numeric_not_lexicographic_comparison_high():
     # "100" < "50" is True for strings; numerically 100 is Too High
     assert check_guess(100, 50)[0] == "Too High"
+
+
+# --- Bug 4: scoring ---
+from logic_utils import get_range_for_difficulty, parse_guess, update_score
+
+
+def test_wrong_guess_never_raises_score():
+    for attempt in range(1, 10):  # odd and even attempts
+        assert update_score(0, "Too High", attempt) < 0
+        assert update_score(0, "Too Low", attempt) < 0
+
+
+def test_first_attempt_win_scores_90():
+    assert update_score(0, "Win", 1) == 90
+
+
+def test_win_score_has_floor_of_10():
+    assert update_score(0, "Win", 50) == 10
+
+
+# --- Difficulty ranges and input parsing (edge cases) ---
+def test_difficulty_ranges():
+    assert get_range_for_difficulty("Easy") == (1, 20)
+    assert get_range_for_difficulty("Normal") == (1, 100)
+    assert get_range_for_difficulty("Hard") == (1, 50)
+
+
+def test_parse_guess_edge_cases():
+    assert parse_guess("") == (False, None, "Enter a guess.")
+    assert parse_guess(None) == (False, None, "Enter a guess.")
+    assert parse_guess("abc")[0] is False
+    assert parse_guess("42") == (True, 42, None)
+    assert parse_guess("3.7") == (True, 3, None)
+    assert parse_guess("-5") == (True, -5, None)
